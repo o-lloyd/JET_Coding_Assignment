@@ -22,7 +22,7 @@ if response.status_code == 200:
     print(f"Restaurants near {postcode}:\n")
 
     for restaurant in restaurants:
-        print({restaurant['name']})
-        print(f"Cuisines: {restaurant['cuisines']}")
+        print(f"{restaurant['name']}")
+        print("Cuisines:", ", ".join(cuisine['name'] for cuisine in restaurant['cuisines']))
         print(f"Rating: {restaurant['rating']['starRating']}")
-        print(f"Address: {restaurant['address']}\n")
+        print(f"Address: {restaurant['address']['firstLine']}, {restaurant['address']['city']}, {restaurant['address']['postalCode']}\n")
