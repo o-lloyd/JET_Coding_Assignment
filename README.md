@@ -1,6 +1,8 @@
 # JET_Coding_Assignment
 
-A terminal application that retrieves data from the Just Eat API and displays information for 10 restaurants for a given postcode.
+A Python console application that fetches restaurant data from the Just Eat API 
+based on a UK postcode and displays the top 10 restaurants, including their 
+name, cuisines, rating, and address.
 
 ## Prerequisites
 
@@ -11,8 +13,8 @@ A terminal application that retrieves data from the Just Eat API and displays in
 
 1. Clone the repository:
 ```bash
-   git clone 
-   cd 
+   git clone https://github.com/o-lloyd/JET_Coding_Assignment.git
+   cd JET_Coding_Assignment
 ```
 
 2. Install the required dependency:
@@ -43,6 +45,8 @@ Address: 426 WILMSLOW ROAD, MANCHESTER, M20 3BW
 
 --------------------------------------------------
 ```
+## Notes
+- The Just Eat API requires a User-Agent header to return a valid JSON response.
 
 ## Assumptions
 - The restaurants did not need to be ordered by rating or distance from the postcode.
@@ -50,4 +54,6 @@ Address: 426 WILMSLOW ROAD, MANCHESTER, M20 3BW
 
 ## Improvements
 - Remove non-food related descriptions from the cuisines output.
-- Allow the user to re-enter a postcode if it is a valid format but is an invalid postcode, i.e. the API request does not return any restaurants.
+- Allow the user to re-enter a postcode if the postcode is non-existant.
+- Allow the user to select a preferred cuisine type to filter the restaurants.
+- Output the data in a web application. This would have been my desired way to show the data for a better user experience, but I am unfamiliar with how to implement this. This would be something I am keen to develop further.
