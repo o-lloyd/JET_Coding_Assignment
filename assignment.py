@@ -1,10 +1,15 @@
 import requests
 import re
 
-BACKUP_POSTCODE = "M204AG" # If user does not input a postcode
+BACKUP_POSTCODE = "M20 4AG" # If user does not input a postcode
 POSTCODE_PATTERN = r'^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$' # Postcode input format
 URL = "https://uk.api.just-eat.io/discovery/uk/restaurants/enriched/bypostcode/{postcode}"
 HEADERS = {"User-Agent": "Mozilla/5.0"}
+NO_OF_RESTAURANTS = 10
+
+def format_postcode(postcode):
+    # Formats the postcode with a space
+    return f"{postcode[:-3]} {postcode[-3:]}"
 
 def get_postcode_input():
 
@@ -13,13 +18,13 @@ def get_postcode_input():
     # Validate input is empty or in the required format
     while True:
         if not postcode:
-            return BACKUP_POSTCODE
+            return BACKUP_POSTCODE.replace(" ", "")
         
         if not re.match(POSTCODE_PATTERN, postcode):
-            postcode = input("Invalid postcode format, please re-enter:")
+            postcode = input("Invalid postcode format, please re-enter:").strip().upper()
             continue
 
-        return postcode
+        return postcode.replace(" ", "")
 
 def get_restaurants(postcode):
 
@@ -32,15 +37,11 @@ def get_restaurants(postcode):
 
         restaurants = data['restaurants']
 
-        # If there are restaurants then return the first 10
-        if restaurants is not None:
-            return restaurants[:10]
-        else:
-            raise ValueError("API response did not contain any restaurant data.")
+        # If there are no restaurants for that postcode
+        if not restaurants:
+            raise ValueError(f"No restaurants found near {format_postcode(postcode)}.")
         
-    # If GET request does not find restaurants for the postcode
-    elif response.status_code == 404:
-        raise ValueError(f"No restaurants found for {postcode}.")
+        return restaurants[:NO_OF_RESTAURANTS]
 
     # If GET request was unsuccessful
     else:
@@ -49,7 +50,7 @@ def get_restaurants(postcode):
 
 def print_restaurants(postcode, restaurants):
 
-    print(f"\nRestaurants near {postcode}:\n")
+    print(f"\nRestaurants near {format_postcode(postcode)}:\n")
     print("-" * 50)
 
     for restaurant in restaurants:
@@ -58,10 +59,14 @@ def print_restaurants(postcode, restaurants):
         star_rating = restaurant.get('rating', {}).get('starRating', 'No Rating')
         address = restaurant.get('address', {})
 
+        first_line = address.get('firstLine')
+        city = address.get('city')
+        postal_code = address.get('postalCode')
+
         print(f"\n{restaurant_name}")
         print("Cuisines:", ", ".join(cuisine.get('name') for cuisine in cuisines))
         print(f"Rating: {star_rating}")
-        print(f"Address: {address.get('firstLine')}, {address.get('city')}, {address.get('postalCode')}\n")
+        print(f"Address: {first_line}, {city}, {postal_code}\n")
         print("-" * 50)
 
 def main():
