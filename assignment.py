@@ -1,22 +1,35 @@
 import requests
+import re
 
-POSTCODE = "M204AG"
-
+BACKUP_POSTCODE = "M204AG" # If user does not input a postcode
+POSTCODE_PATTERN = r'^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$' # Postcode input format
 URL = "https://uk.api.just-eat.io/discovery/uk/restaurants/enriched/bypostcode/{postcode}"
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
+def get_postcode_input():
+
+    postcode = input(f"Enter a UK postcode, or press 'Enter' to use '{BACKUP_POSTCODE}': ").strip().upper()
+
+    # Validate input is empty or in the required format
+    while True:
+        if not postcode:
+            return BACKUP_POSTCODE
+        
+        if not re.match(POSTCODE_PATTERN, postcode):
+            postcode = input("Invalid postcode format, please re-enter:")
+            continue
+
+        return postcode
+
 def get_restaurants(postcode):
 
-    # Send GET request to the API
     response = requests.get(URL.format(postcode=postcode), headers=HEADERS)
 
     # If the GET request was successful
     if response.status_code == 200:
 
-        # Turn json response into python dictionary
         data = response.json()
 
-        # Get data of the first restaurants
         restaurants = data['restaurants']
 
         # If there are restaurants then return the first 10
@@ -24,10 +37,14 @@ def get_restaurants(postcode):
             return restaurants[:10]
         else:
             raise ValueError("API response did not contain any restaurant data.")
+        
+    # If GET request does not find restaurants for the postcode
+    elif response.status_code == 404:
+        raise ValueError(f"No restaurants found for {postcode}.")
 
     # If GET request was unsuccessful
     else:
-        print("Error: ", response.status_code)
+        raise ValueError(f"Error: {response.status_code}")
 
 
 def print_restaurants(postcode, restaurants):
@@ -48,10 +65,9 @@ def print_restaurants(postcode, restaurants):
         print("-" * 50)
 
 def main():
-    restaurants = get_restaurants(POSTCODE)
-
-    if restaurants is not None:
-        print_restaurants(POSTCODE, restaurants)
+    postcode = get_postcode_input()
+    restaurants = get_restaurants(postcode)
+    print_restaurants(postcode, restaurants)
 
 if __name__ == "__main__":
     main()
